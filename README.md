@@ -155,15 +155,39 @@ Isso evita que o mesmo item seja salvo varias vezes em coletas subsequentes.
 
 ### 1. Criar ambiente virtual
 
+#### Linux / macOS
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
+#### Windows PowerShell
+
+```powershell
+py -m venv .venv
+.venv\Scripts\Activate.ps1
+```
+
+#### Windows CMD
+
+```cmd
+py -m venv .venv
+.venv\Scripts\activate.bat
+```
+
 ### 2. Instalar dependencias
+
+#### Linux / macOS
 
 ```bash
 pip install -r requirements.txt
+```
+
+#### Windows PowerShell / CMD
+
+```powershell
+py -m pip install -r requirements.txt
 ```
 
 ### 3. Editar os feeds RSS
@@ -203,14 +227,30 @@ E adicione suas fontes no formato:
 
 ### 4. Rodar a ingestao
 
+#### Linux / macOS
+
 ```bash
 python3 main.py
 ```
 
+#### Windows PowerShell / CMD
+
+```powershell
+py main.py
+```
+
 ### 5. Rodar a interface web
+
+#### Linux / macOS
 
 ```bash
 python3 run_web.py
+```
+
+#### Windows PowerShell / CMD
+
+```powershell
+py run_web.py
 ```
 
 Depois abra:
@@ -367,6 +407,13 @@ Todo o parsing XML e a persistencia usam bibliotecas da propria biblioteca padra
 Dependencia opcional para fontes mais protegidas:
 
 - `playwright`, caso voce queira habilitar o modo de navegador automatizado para feeds bloqueados ou paginas que exigem renderizacao mais realista.
+
+Se quiser usar `playwright` no Windows:
+
+```powershell
+py -m pip install playwright
+py -m playwright install
+```
 
 ### Compatibilidade de feeds
 
