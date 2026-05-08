@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Meridiano | Estatisticas{% endblock %}
+
+{% block content %}
+    <section class="page-intro">
+        <p class="section-label">Estatisticas por RSS</p>
+        <h2>Fontes e volume coletado</h2>
+        <p class="hero-copy">Acompanhe quantidade de artigos, ultima publicacao e ultima coleta por fonte.</p>
+    </section>
+
+    <section class="panel">
+        <div class="table-shell">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fonte</th>
+                        <th>Categoria</th>
+                        <th>Artigos</th>
+                        <th>Ultima publicacao</th>
+                        <th>Ultima coleta</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stat in stats %}
+                        <tr>
+                            <td>
+                                <strong>{{ stat.source_name }}</strong>
+                                <div class="muted">{{ stat.source_url }}</div>
+                            </td>
+                            <td>{{ stat.category or "-" }}</td>
+                            <td>{{ stat.article_count }}</td>
+                            <td>{{ stat.last_published_at or "-" }}</td>
+                            <td>{{ stat.last_scraped_at or "-" }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="empty-state">Nenhuma estatistica disponivel ainda. Rode o scraping para popular o painel.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+{% endblock %}

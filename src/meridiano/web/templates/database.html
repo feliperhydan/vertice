@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Meridiano | Banco{% endblock %}
+
+{% block content %}
+    <section class="page-intro">
+        <p class="section-label">Banco de dados</p>
+        <h2>Administrar dados armazenados</h2>
+        <p class="hero-copy">Use estas acoes para limpar artigos ou resetar os registros salvos no SQLite.</p>
+    </section>
+
+    <section class="stats-grid overview-grid">
+        <article class="stat-card">
+            <span class="stat-label">Artigos no banco</span>
+            <strong class="stat-value">{{ counts.articles }}</strong>
+        </article>
+        <article class="stat-card">
+            <span class="stat-label">Fontes configuradas</span>
+            <strong class="stat-value">{{ rss_sources|length }}</strong>
+        </article>
+        <article class="stat-card">
+            <span class="stat-label">Fontes registradas no banco</span>
+            <strong class="stat-value">{{ counts.sources }}</strong>
+        </article>
+    </section>
+
+    <section class="split-layout">
+        <div class="panel danger-panel">
+            <div class="panel-header">
+                <div>
+                    <p class="section-label">Limpeza parcial</p>
+                    <h2>Apagar somente artigos</h2>
+                </div>
+            </div>
+            <form method="post" action="{{ url_for('clear_database') }}" class="danger-actions">
+                <input type="hidden" name="scope" value="articles">
+                <button type="submit" class="secondary-button">Apagar somente artigos</button>
+            </form>
+        </div>
+
+        <div class="panel danger-panel">
+            <div class="panel-header">
+                <div>
+                    <p class="section-label">Reset completo</p>
+                    <h2>Apagar artigos e fontes do banco</h2>
+                </div>
+            </div>
+            <form method="post" action="{{ url_for('clear_database') }}" class="danger-actions">
+                <input type="hidden" name="scope" value="all">
+                <button type="submit" class="danger-button">Apagar artigos e fontes do banco</button>
+            </form>
+            <p class="danger-note">
+                O arquivo <code>data/rss_sources.json</code> continua preservado para manter sua configuracao de feeds.
+            </p>
+        </div>
+    </section>
+{% endblock %}

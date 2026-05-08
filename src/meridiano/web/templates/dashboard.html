@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Meridiano | Inicio{% endblock %}
+
+{% block content %}
+    <section class="hero">
+        <div>
+            <p class="eyebrow">Painel principal</p>
+            <h2 class="hero-title">Execute coletas e acompanhe o panorama do projeto</h2>
+            <p class="hero-copy">
+                Use este painel para iniciar o scraping manualmente e acompanhar o estado geral do banco e das fontes configuradas.
+            </p>
+        </div>
+        <form method="post" action="{{ url_for('scrape') }}" class="hero-action">
+            <button type="submit" class="primary-button">Executar scraping</button>
+        </form>
+    </section>
+
+    <section class="stats-grid overview-grid">
+        <article class="stat-card">
+            <span class="stat-label">Artigos no banco</span>
+            <strong class="stat-value">{{ counts.articles }}</strong>
+        </article>
+        <article class="stat-card">
+            <span class="stat-label">Fontes salvas</span>
+            <strong class="stat-value">{{ rss_sources|length }}</strong>
+        </article>
+        <article class="stat-card">
+            <span class="stat-label">Fontes no banco</span>
+            <strong class="stat-value">{{ counts.sources }}</strong>
+        </article>
+    </section>
+
+    {% if scrape_summary %}
+        <section class="panel">
+            <div class="panel-header">
+                <div>
+                    <p class="section-label">Resultado do scraping</p>
+                    <h2>Relatorio da ultima execucao</h2>
+                </div>
+                <div class="summary-pill">
+                    Novos: {{ scrape_summary.new_articles }} | Duplicados: {{ scrape_summary.skipped_duplicates }} | Erros: {{ scrape_summary.errors }}
+                </div>
+            </div>
+            <div class="table-shell">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fonte</th>
+                            <th>Itens lidos</th>
+                            <th>Novos</th>
+                            <th>Duplicados</th>
+                            <th>Estrategia</th>
+                            <th>Status</th>
+                            <th>Mensagem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in scrape_summary.sources %}
+                            <tr>
+                                <td>
+                                    <strong>{{ item.source_name }}</strong>
+                                    <div class="muted">{{ item.source_url }}</div>
+                                </td>
+                                <td>{{ item.fetched_items }}</td>
+                                <td>{{ item.new_articles }}</td>
+                                <td>{{ item.skipped_duplicates }}</td>
+                                <td>{{ item.strategy or "-" }}</td>
+                                <td>
+                                    {% if item.error %}
+                                        <span class="badge badge-error">Erro</span>
+                                    {% else %}
+                                        <span class="badge badge-success">Sucesso</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ item.error or "-" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    {% endif %}
+{% endblock %}

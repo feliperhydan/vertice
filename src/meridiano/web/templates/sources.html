@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+
+{% block title %}Meridiano | RSS{% endblock %}
+
+{% block content %}
+    <section class="page-intro">
+        <p class="section-label">Gerenciar RSS</p>
+        <h2>Adicionar, editar e remover fontes</h2>
+        <p class="hero-copy">As alteracoes feitas aqui sao persistidas em <code>data/rss_sources.json</code>.</p>
+    </section>
+
+    <section class="panel">
+        <div class="panel-header">
+            <div>
+                <p class="section-label">Validador inteligente</p>
+                <h2>Inspecionar feeds e sugerir substituicoes</h2>
+            </div>
+        </div>
+        <form method="post" action="{{ url_for('validate_rss') }}">
+            <button type="submit" class="primary-button compact-button">Validar todos os RSS</button>
+        </form>
+    </section>
+
+    {% if source_validations %}
+        <section class="panel" id="validation-results-panel">
+            <div class="panel-header">
+                <div>
+                    <p class="section-label">Resultado da validacao</p>
+                    <h2>Status das fontes</h2>
+                </div>
+            </div>
+            <div class="table-shell">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fonte</th>
+                            <th>Status</th>
+                            <th>HTTP</th>
+                            <th>Artigos</th>
+                            <th>URL sugerida</th>
+                            <th>Detalhes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in source_validations %}
+                            <tr id="validation-row-{{ loop.index0 }}">
+                                <td>
+                                    <strong>{{ result.source_name }}</strong>
+                                    <div class="muted source-url-label">{{ result.source_url }}</div>
+                                </td>
+                                <td>
+                                    <span class="badge badge-{{ result.status|replace('_', '-') }}">{{ result.status }}</span>
+                                </td>
+                                <td>{{ result.http_status or "-" }}</td>
+                                <td>{{ result.article_count }}</td>
+                                <td>
+                                    {% if result.suggested_url %}
+                                        <div class="muted wrap-text suggested-url-label">{{ result.suggested_url }}</div>
+                                        {% set source_index = loop.index0 %}
+                                        <form method="post" action="{{ url_for('apply_rss_suggestion', source_index=source_index) }}" class="inline-form apply-suggestion-form" data-source-index="{{ source_index }}">
+                                            <input type="hidden" name="suggested_url" value="{{ result.suggested_url }}">
+                                            <button type="submit" class="secondary-button compact-button">Aplicar sugestao</button>
+                                        </form>
+                                        <div class="apply-suggestion-feedback muted"></div>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div>{{ result.message }}</div>
+                                    <div class="muted wrap-text">
+                                        final_url={{ result.final_url }} | content_type={{ result.content_type }} | confianca={{ result.confidence }}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    {% endif %}
+
+    <section class="split-layout">
+        <div class="panel">
+            <div class="panel-header">
+                <div>
+                    <p class="section-label">Nova fonte</p>
+                    <h2>Adicionar RSS</h2>
+                </div>
+            </div>
+            <form method="post" action="{{ url_for('add_rss') }}" class="form-grid">
+                <label>
+                    <span>Nome</span>
+                    <input type="text" name="name" placeholder="Ex.: arXiv AI" required>
+                </label>
+                <label>
+                    <span>URL do RSS</span>
+                    <input type="url" name="url" placeholder="https://..." required>
+                </label>
+                <label>
+                    <span>Categoria</span>
+                    <input type="text" name="category" placeholder="ciencia, noticias, tecnologia...">
+                </label>
+                <button type="submit" class="primary-button">Salvar RSS</button>
+            </form>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="panel-header">
+            <div>
+                <p class="section-label">Fontes cadastradas</p>
+                <h2>Editar ou remover RSS</h2>
+            </div>
+        </div>
+        <div class="rss-list">
+            {% for source in rss_sources %}
+                <article class="rss-card" id="rss-card-{{ loop.index0 }}">
+                    <form method="post" action="{{ url_for('update_rss', source_index=loop.index0) }}" class="form-grid">
+                        <label>
+                            <span>Nome</span>
+                            <input type="text" name="name" value="{{ source.name }}" required>
+                        </label>
+                        <label>
+                            <span>URL</span>
+                            <input type="url" name="url" value="{{ source.url }}" class="source-url-input" required>
+                        </label>
+                        <label>
+                            <span>Categoria</span>
+                            <input type="text" name="category" value="{{ source.category }}">
+                        </label>
+                        <div class="rss-card-actions">
+                            <button type="submit" class="secondary-button">Atualizar</button>
+                        </div>
+                    </form>
+                    <form method="post" action="{{ url_for('delete_rss', source_index=loop.index0) }}">
+                        <button type="submit" class="danger-button subtle-danger">Remover RSS</button>
+                    </form>
+                </article>
+            {% else %}
+                <p class="empty-state">Nenhuma fonte RSS cadastrada.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    <script>
+        const suggestionForms = document.querySelectorAll(".apply-suggestion-form");
+
+        for (const form of suggestionForms) {
+            form.addEventListener("submit", async (event) => {
+                event.preventDefault();
+
+                const button = form.querySelector("button");
+                const sourceIndex = form.dataset.sourceIndex;
+                const feedback = form.parentElement.querySelector(".apply-suggestion-feedback");
+                const formData = new FormData(form);
+
+                button.disabled = true;
+                const originalLabel = button.textContent;
+                button.textContent = "Aplicando...";
+                if (feedback) {
+                    feedback.textContent = "";
+                    feedback.classList.remove("feedback-success", "feedback-error");
+                }
+
+                try {
+                    const response = await fetch(form.action, {
+                        method: "POST",
+                        body: formData,
+                        headers: {
+                            "X-Requested-With": "fetch",
+                        },
+                    });
+
+                    const payload = await response.json();
+                    if (!response.ok || !payload.success) {
+                        throw new Error(payload.message || "Falha ao aplicar a sugestao.");
+                    }
+
+                    const validationRow = document.getElementById(`validation-row-${sourceIndex}`);
+                    const rssCard = document.getElementById(`rss-card-${sourceIndex}`);
+
+                    if (validationRow) {
+                        const sourceUrlLabel = validationRow.querySelector(".source-url-label");
+                        if (sourceUrlLabel) {
+                            sourceUrlLabel.textContent = payload.updated_url;
+                        }
+
+                        const suggestedLabel = validationRow.querySelector(".suggested-url-label");
+                        if (suggestedLabel) {
+                            suggestedLabel.textContent = payload.updated_url;
+                        }
+
+                        const badge = validationRow.querySelector(".badge");
+                        if (badge) {
+                            badge.textContent = "suggestion_applied";
+                            badge.className = "badge badge-ok";
+                        }
+                    }
+
+                    if (rssCard) {
+                        const sourceUrlInput = rssCard.querySelector(".source-url-input");
+                        if (sourceUrlInput) {
+                            sourceUrlInput.value = payload.updated_url;
+                        }
+                    }
+
+                    form.remove();
+
+                    if (feedback) {
+                        feedback.textContent = payload.message;
+                        feedback.classList.add("feedback-success");
+                    }
+                } catch (error) {
+                    if (feedback) {
+                        feedback.textContent = error.message;
+                        feedback.classList.add("feedback-error");
+                    }
+                    button.disabled = false;
+                    button.textContent = originalLabel;
+                    return;
+                }
+
+                button.disabled = true;
+                button.textContent = "Aplicada";
+            });
+        }
+    </script>
+{% endblock %}
