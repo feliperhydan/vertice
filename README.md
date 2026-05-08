@@ -1,6 +1,6 @@
-# Meridiano
+# Vértice
 
-Meridiano e uma base para um aplicativo em Python focado em:
+Vértice e uma base para um aplicativo em Python focado em:
 
 1. coletar noticias e artigos cientificos por meio de feeds RSS;
 2. normalizar e armazenar esses dados em banco de dados local;
@@ -19,7 +19,7 @@ Neste primeiro estagio, o projeto entrega a fundacao de coleta e persistencia:
 
 ## Objetivo do projeto
 
-A proposta do Meridiano e funcionar como um pipeline local para descoberta e organizacao de conteudo. Em vez de depender apenas de leitura manual de varios sites e revistas, o sistema centraliza os itens publicados em feeds RSS e salva tudo em um banco local. Depois, uma camada de IA podera ler os registros coletados e classifica-los por relevancia, qualidade metodologica, atualidade, potencial de impacto ou qualquer outra heuristica definida pelo usuario.
+A proposta do Vértice e funcionar como um pipeline local para descoberta e organizacao de conteudo. Em vez de depender apenas de leitura manual de varios sites e revistas, o sistema centraliza os itens publicados em feeds RSS e salva tudo em um banco local. Depois, uma camada de IA podera ler os registros coletados e classifica-los por relevancia, qualidade metodologica, atualidade, potencial de impacto ou qualquer outra heuristica definida pelo usuario.
 
 ## Escopo implementado agora
 
@@ -47,7 +47,7 @@ O que fica preparado para a proxima etapa:
 ## Estrutura do projeto
 
 ```text
-Meridiano/
+Vértice/
 ├── README.md
 ├── requirements.txt
 ├── main.py
@@ -55,7 +55,7 @@ Meridiano/
 ├── data/
 │   └── .gitkeep
 └── src/
-    └── meridiano/
+    └── Vértice/
         ├── __init__.py
         ├── bootstrap.py
         ├── config/
@@ -90,7 +90,7 @@ Meridiano/
 
 ## Como o fluxo funciona
 
-1. O projeto possui fontes padrao em `src/meridiano/config/rss_sources.py`.
+1. O projeto possui fontes padrao em `src/Vértice/config/rss_sources.py`.
 2. Na primeira execucao, essas fontes sao copiadas para `data/rss_sources.json`.
 3. O frontend passa a ler e editar esse arquivo persistido.
 4. O comando de scraping percorre todas as URLs configuradas.
@@ -221,7 +221,7 @@ Depois abra:
 
 Por padrao, o banco sera criado em:
 
-- `data/meridiano.db`
+- `data/Vértice.db`
 
 ## Funcionalidades da interface web
 
@@ -380,7 +380,7 @@ O parser foi adaptado para tolerar o maximo possivel de variacoes comuns de feed
 
 ### Leitura hibrida de fontes
 
-O Meridiano agora usa uma estrategia em camadas:
+O Vértice agora usa uma estrategia em camadas:
 
 1. tenta ler como feed XML normal;
 2. se receber HTML, tenta descobrir um feed alternativo na pagina;
@@ -406,7 +406,7 @@ Isso ajuda em fontes que:
 
 ## Resumo
 
-O Meridiano ja entrega a espinha dorsal do sistema:
+O Vértice ja entrega a espinha dorsal do sistema:
 
 - entrada configuravel de feeds RSS;
 - coleta automatizada;
