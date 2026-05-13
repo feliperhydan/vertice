@@ -3,20 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Meridiano{% endblock %}</title>
+    <title>{% block title %}Vertice{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
     <div class="page-shell">
         <header class="topbar">
             <div class="brand-block">
-                <p class="eyebrow">Meridiano</p>
+                <p class="eyebrow">Vertice</p>
                 <h1 class="brand-title">Centro de monitoramento RSS</h1>
             </div>
             <nav class="main-nav">
                 <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' %}is-active{% endif %}">Inicio</a>
                 <a href="{{ url_for('articles') }}" class="nav-link {% if request.endpoint == 'articles' %}is-active{% endif %}">Artigos</a>
                 <a href="{{ url_for('stats') }}" class="nav-link {% if request.endpoint == 'stats' %}is-active{% endif %}">Estatisticas</a>
+                <a href="{{ url_for('operations') }}" class="nav-link {% if request.endpoint == 'operations' %}is-active{% endif %}">Operacoes</a>
                 <a href="{{ url_for('sources') }}" class="nav-link {% if request.endpoint == 'sources' %}is-active{% endif %}">RSS</a>
                 <a href="{{ url_for('database') }}" class="nav-link {% if request.endpoint == 'database' %}is-active{% endif %}">Banco</a>
             </nav>

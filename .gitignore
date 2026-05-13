@@ -22,6 +22,8 @@ data/*.db
 data/rss_sources.json
 *.sqlite3
 *.log
+logs/
+*.jsonl
 
 # Editor and OS files
 .DS_Store

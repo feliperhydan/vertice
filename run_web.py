@@ -1,4 +1,4 @@
-from src.meridiano.web.app import run
+from src.vertice.web.app import run
 
 
 if __name__ == "__main__":

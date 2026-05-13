@@ -11,10 +11,9 @@ from .services.rss_parser import RSSParser
 
 
 def main() -> None:
-    configure_logging()
-    logger = logging.getLogger(__name__)
-
     settings = AppSettings()
+    configure_logging(settings.app_log_path)
+    logger = logging.getLogger(__name__)
     rss_sources = load_rss_sources(settings.rss_sources_path)
     database_manager = DatabaseManager(settings.database_path)
     repository = ArticleRepository(database_manager)
@@ -27,7 +26,7 @@ def main() -> None:
         parser=parser,
     )
 
-    logger.info("Starting Meridiano RSS ingestion")
+    logger.info("Starting Vertice RSS ingestion")
     ingestion_summary = ingestion_service.run()
     logger.info(
         "Ingestion completed | new_articles=%s | skipped_duplicates=%s | errors=%s",

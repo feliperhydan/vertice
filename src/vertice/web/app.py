@@ -7,16 +7,15 @@ from ..logging_config import configure_logging
 
 
 def create_app() -> Flask:
-    configure_logging()
+    settings = AppSettings()
+    configure_logging(settings.app_log_path)
 
     app = Flask(
         __name__,
         template_folder="templates",
         static_folder="static",
     )
-    app.config["SECRET_KEY"] = "meridiano-dev-secret-key"
-
-    settings = AppSettings()
+    app.config["SECRET_KEY"] = "vertice-dev-secret-key"
 
     def build_page_context():
         runtime = build_runtime()
@@ -37,9 +36,48 @@ def create_app() -> Flask:
     def articles():
         return render_template("articles.html", **build_page_context())
 
+    @app.post("/articles/enrich")
+    def enrich_articles():
+        runtime = build_runtime()
+        result = runtime["article_enrichment_service"].enrich_pending_articles()
+        flash(
+            (
+                "Enriquecimento concluido. "
+                f"processados={result.processed} | ignorados={result.skipped} | erros={result.errors}"
+            ),
+            "success",
+        )
+        return redirect(url_for("articles"))
+
+    @app.post("/articles/summarize")
+    def summarize_articles():
+        runtime = build_runtime()
+        try:
+            result = runtime["article_analysis_service"].summarize_pending_articles()
+            flash(
+                (
+                    "Resumos com Ollama concluidos. "
+                    f"processados={result.processed} | ignorados={result.skipped} | erros={result.errors}"
+                ),
+                "success",
+            )
+        except Exception as exc:
+            flash(f"Falha ao gerar resumos com Ollama: {exc}", "error")
+        return redirect(url_for("articles"))
+
     @app.get("/stats")
     def stats():
         return render_template("stats.html", **build_page_context())
+
+    @app.get("/operations")
+    def operations():
+        runtime = build_runtime()
+        operations_dashboard = runtime["operation_stats_service"].build_dashboard()
+        return render_template(
+            "operations.html",
+            operations_dashboard=operations_dashboard,
+            **build_page_context(),
+        )
 
     @app.get("/sources")
     def sources():

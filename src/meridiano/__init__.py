@@ -1,1 +1,0 @@
-"""Meridiano application package."""

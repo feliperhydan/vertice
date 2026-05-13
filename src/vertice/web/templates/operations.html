@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}Vertice | Operacoes{% endblock %}
+
+{% block content %}
+    <section class="page-intro">
+        <p class="section-label">Observabilidade</p>
+        <h2>Estatisticas operacionais do pipeline</h2>
+        <p class="hero-copy">Acompanhe o estado do banco, o historico recente de execucoes e os erros registrados por scraping, enriquecimento e resumo.</p>
+    </section>
+
+    <section class="stats-grid operations-overview-grid">
+        <article class="stat-card">
+            <span class="stat-label">Artigos totais</span>
+            <strong class="stat-value">{{ operations_dashboard.processing_counts.total_articles }}</strong>
+        </article>
+        <article class="stat-card">
+            <span class="stat-label">Artigos enriquecidos</span>
+            <strong class="stat-value">{{ operations_dashboard.processing_counts.enriched_articles }}</strong>
+        </article>
+        <article class="stat-card">
+            <span class="stat-label">Artigos com resumo</span>
+            <strong class="stat-value">{{ operations_dashboard.processing_counts.summarized_articles }}</strong>
+        </article>
+        <article class="stat-card">
+            <span class="stat-label">Pendentes de enrichment</span>
+            <strong class="stat-value">{{ operations_dashboard.processing_counts.pending_enrichment }}</strong>
+        </article>
+        <article class="stat-card">
+            <span class="stat-label">Pendentes de resumo</span>
+            <strong class="stat-value">{{ operations_dashboard.processing_counts.pending_summary }}</strong>
+        </article>
+        <article class="stat-card">
+            <span class="stat-label">Erros registrados</span>
+            <strong class="stat-value">{{ operations_dashboard.execution_counts.logged_errors }}</strong>
+        </article>
+    </section>
+
+    <section class="stats-grid operations-overview-grid">
+        <article class="stat-card">
+            <span class="stat-label">Execucoes de scraping</span>
+            <strong class="stat-value">{{ operations_dashboard.execution_counts.scrape_runs }}</strong>
+        </article>
+        <article class="stat-card">
+            <span class="stat-label">Execucoes de enrichment</span>
+            <strong class="stat-value">{{ operations_dashboard.execution_counts.enrich_runs }}</strong>
+        </article>
+        <article class="stat-card">
+            <span class="stat-label">Execucoes de resumo</span>
+            <strong class="stat-value">{{ operations_dashboard.execution_counts.summary_runs }}</strong>
+        </article>
+    </section>
+
+    <section class="split-layout">
+        <div class="panel">
+            <div class="panel-header">
+                <div>
+                    <p class="section-label">Ultimas execucoes</p>
+                    <h2>Estado mais recente por operacao</h2>
+                </div>
+            </div>
+            <div class="articles-grid compact-grid">
+                {% for operation_name, run in operations_dashboard.latest_runs.items() %}
+                    <article class="article-card compact-card">
+                        <div class="article-meta">
+                            <span class="badge">{{ operation_name }}</span>
+                            {% if run %}
+                                {% if run.error_count %}
+                                    <span class="badge badge-error">{{ run.error_count }} erro(s)</span>
+                                {% else %}
+                                    <span class="badge badge-success">sem erros</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="badge">sem historico</span>
+                            {% endif %}
+                        </div>
+                        {% if run %}
+                            <p class="article-summary">
+                                principal={{ run.primary_count }} | secundario={{ run.secondary_count }}
+                                {% if run.elapsed_seconds is not none %}| tempo={{ "%.2f"|format(run.elapsed_seconds) }}s{% endif %}
+                            </p>
+                            <div class="muted">{{ run.timestamp }}</div>
+                            {% if run.extra_label and run.extra_value %}
+                                <div class="muted">{{ run.extra_label }}={{ run.extra_value }}</div>
+                            {% endif %}
+                        {% else %}
+                            <p class="article-summary">Nenhuma execucao registrada ainda.</p>
+                        {% endif %}
+                    </article>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="panel">
+            <div class="panel-header">
+                <div>
+                    <p class="section-label">Erros por operacao</p>
+                    <h2>Onde o pipeline mais falha</h2>
+                </div>
+            </div>
+            <div class="table-shell">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Operacao</th>
+                            <th>Erros</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in operations_dashboard.error_breakdown %}
+                            <tr>
+                                <td>{{ item.operation }}</td>
+                                <td>{{ item.count }}</td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="2" class="empty-state">Nenhum erro estruturado foi registrado ainda.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="panel-header">
+            <div>
+                <p class="section-label">Historico recente</p>
+                <h2>Lotes executados</h2>
+            </div>
+        </div>
+        <div class="table-shell">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Operacao</th>
+                        <th>Quando</th>
+                        <th>Principal</th>
+                        <th>Secundario</th>
+                        <th>Erros</th>
+                        <th>Tempo</th>
+                        <th>Extra</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for run in operations_dashboard.recent_batch_runs %}
+                        <tr>
+                            <td><span class="badge">{{ run.operation }}</span></td>
+                            <td>{{ run.timestamp }}</td>
+                            <td>{{ run.primary_count }}</td>
+                            <td>{{ run.secondary_count }}</td>
+                            <td>{{ run.error_count }}</td>
+                            <td>
+                                {% if run.elapsed_seconds is not none %}
+                                    {{ "%.2f"|format(run.elapsed_seconds) }}s
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if run.extra_label and run.extra_value %}
+                                    {{ run.extra_label }}={{ run.extra_value }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="empty-state">Ainda nao ha historico suficiente nos logs para montar esta tabela.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="panel-header">
+            <div>
+                <p class="section-label">Ultimos erros</p>
+                <h2>Falhas registradas em arquivo</h2>
+            </div>
+        </div>
+        <div class="table-shell">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Quando</th>
+                        <th>Operacao</th>
+                        <th>Etapa</th>
+                        <th>Tipo</th>
+                        <th>Mensagem</th>
+                        <th>Contexto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for error in operations_dashboard.recent_errors %}
+                        <tr>
+                            <td>{{ error.timestamp }}</td>
+                            <td>{{ error.operation }}</td>
+                            <td>{{ error.stage }}</td>
+                            <td>{{ error.exception_type }}</td>
+                            <td>{{ error.error_message }}</td>
+                            <td>
+                                {% if error.context_label and error.context_value %}
+                                    <strong>{{ error.context_label }}:</strong> {{ error.context_value }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="empty-state">Nenhum erro estruturado encontrado.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+{% endblock %}

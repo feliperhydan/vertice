@@ -1,4 +1,4 @@
-from src.meridiano.cli import main
+from src.vertice.cli import main
 
 
 if __name__ == "__main__":

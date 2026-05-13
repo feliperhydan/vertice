@@ -1,7 +1,12 @@
 import sqlite3
 from pathlib import Path
 
-from .models import ARTICLES_TABLE_SQL, SOURCES_TABLE_SQL
+from .models import (
+    ARTICLES_TABLE_SQL,
+    ARTICLE_CONTENT_TABLE_SQL,
+    ARTICLE_SUMMARY_TABLE_SQL,
+    SOURCES_TABLE_SQL,
+)
 
 
 class DatabaseManager:
@@ -20,3 +25,5 @@ class DatabaseManager:
             connection.execute("PRAGMA foreign_keys = ON;")
             connection.execute(SOURCES_TABLE_SQL)
             connection.execute(ARTICLES_TABLE_SQL)
+            connection.execute(ARTICLE_CONTENT_TABLE_SQL)
+            connection.execute(ARTICLE_SUMMARY_TABLE_SQL)

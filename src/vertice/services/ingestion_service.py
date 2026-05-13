@@ -112,6 +112,13 @@ class IngestionService:
                 source_summary.strategy,
             )
 
+        self.logger.info(
+            "[SCRAPE] batch finished | new_articles=%s | duplicates=%s | errors=%s | sources=%s",
+            new_articles,
+            skipped_duplicates,
+            errors,
+            len(source_summaries),
+        )
         return IngestionSummary(
             new_articles=new_articles,
             skipped_duplicates=skipped_duplicates,
